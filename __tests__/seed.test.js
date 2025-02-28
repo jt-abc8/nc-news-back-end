@@ -30,7 +30,7 @@ describe('seed', () => {
                     AND column_name = 'slug';`
         )
         .then(({ rows: [column] }) => {
-          console.log(column);
+          //console.log(column);
           expect(column.column_name).toBe('slug');
           expect(column.data_type).toBe('character varying');
         });
@@ -317,7 +317,7 @@ describe('seed', () => {
           );
         });
     });
-    test('comments table has article_id column as the primary key', () => {
+    test('comments table has comment_id column as the primary key', () => {
       return db
         .query(
           `SELECT column_name
