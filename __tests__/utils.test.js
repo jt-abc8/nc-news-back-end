@@ -1,12 +1,7 @@
-const {
-    convertTimestampToDate,
-    formatData,
-    formatQueryString,
-} = require("../db/seeds/utils");
+const { convertTimestampToDate, getRecordID } = require("../db/seeds/utils");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data/index");
-const format = require("pg-format");
 
 beforeAll(() => seed(data));
 afterAll(() => db.end());
@@ -44,5 +39,21 @@ describe("convertTimestampToDate", () => {
         const result = convertTimestampToDate(input);
         const expected = { key: "value" };
         expect(result).toEqual(expected);
+    });
+});
+
+describe("getRecordID", () => {
+    const { commentData } = data;
+    const { article_title } = commentData[10];
+
+    test("returns an integer", async () => {
+        const ref = { key: "title", value: article_title };
+        const result = await getRecordID("article_id", "articles", ref);
+        expect(Number.isInteger(result)).toBe(true);
+    });
+    test("returns the specific id of a record with a matching reference value", async () => {
+        const ref = { key: "title", value: article_title };
+        const result = await getRecordID("article_id", "articles", ref);
+        expect(result).toBe(3);
     });
 });
