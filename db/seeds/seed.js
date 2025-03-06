@@ -1,114 +1,92 @@
 const db = require("../connection");
 const format = require("pg-format");
-const { convertTimestampToDate } = require("./utils");
+const { convertTimestampToDate, getRecordID } = require("./utils");
+const {
+    createTopicsQuery,
+    createUsersQuery,
+    createArticlesQuery,
+    createCommentsQuery,
+} = require("../queries");
 
-const seed = async ({ topicData, userData, articleData, commentData }) => {
-    return db
-        .query(`DROP TABLE IF EXISTS topics`)
-        .then(() => db.query(`DROP TABLE IF EXISTS comments`))
-        .then(() => db.query(`DROP TABLE IF EXISTS users`))
-        .then(() => db.query(`DROP TABLE IF EXISTS articles`))
+async function seed({ topicData, userData, articleData, commentData }) {
+    await dropTables();
+    await createTables();
+    await insertTopicData();
+    await insertUserData();
+    await insertArticleData();
+    await insertCommentData();
 
-        .then(() => {
-            return db.query(`CREATE TABLE topics(
-            slug VARCHAR(100) PRIMARY KEY NOT NULL,
-            description VARCHAR(200),
-            img_url VARCHAR(1000))`);
-        })
-        .then(() => {
-            return db.query(`CREATE TABLE users(
-            username VARCHAR(20) PRIMARY KEY NOT NULL UNIQUE,
-            name VARCHAR(100) NOT NULL,
-            avatar_url VARCHAR(1000))`);
-        })
-        .then(() => {
-            return db.query(`CREATE TABLE articles(
-            article_id SERIAL PRIMARY KEY,
-            title VARCHAR(100),
-            topic VARCHAR(100),
-            author VARCHAR(100),
-            body TEXT,
-            created_at TIMESTAMP,
-            votes INT,
-            article_img_url VARCHAR(1000))`);
-        })
-        .then(() => {
-            return db.query(`CREATE TABLE comments(
-            comment_id SERIAL PRIMARY KEY,
-            article_id INT REFERENCES articles(article_id),
-            body TEXT,
-            votes INT, 
-            author VARCHAR(100) REFERENCES users(username),
-            created_at TIMESTAMP)`);
-        })
-        .then(() => {
-            const formattedData = topicData.map((topic) => [
-                topic.slug,
-                topic.description,
-                topic.img_url,
-            ]);
-            const query = format(
-                `INSERT INTO topics(slug, description, img_url) 
-                VALUES %L`,
-                formattedData
-            );
-            return db.query(query);
-        })
-        .then(() => {
-            const formattedData = userData.map((user) => [
-                user.username,
-                user.name,
-                user.avatar_url,
-            ]);
-            const query = format(
-                `INSERT INTO users(username, name, avatar_url)
-                VALUES %L`,
-                formattedData
-            );
-            return db.query(query);
-        })
-        .then(() => {
-            const formattedData = articleData.map((article) => [
-                article.title,
-                article.topic,
-                article.author,
-                article.body,
-                convertTimestampToDate({ created_at: article.created_at })
-                    .created_at,
-                article.votes,
-                article.img_url,
-            ]);
-            const query = format(
-                `INSERT INTO articles(title, topic, author, body, created_at, votes, article_img_url)
-                VALUES %L`,
-                formattedData
-            );
-            return db.query(query);
-        })
-        .then(() => db.query(`SELECT * FROM articles`))
-        .then(({ rows }) => {
-            const lookup = rows.reduce((obj, { article_id, title }) => {
-                obj[title] = article_id;
-                return obj;
-            }, {});
-            const formattedData = commentData.map((comment) => {
-                const array = [
-                    lookup[comment.article_title],
-                    comment.body,
-                    comment.votes,
-                    comment.author,
-                    convertTimestampToDate({ created_at: comment.created_at })
-                        .created_at,
+    async function dropTables() {
+        await db.query(`DROP TABLE IF EXISTS comments`);
+        await db.query(`DROP TABLE IF EXISTS articles`);
+        await db.query(`DROP TABLE IF EXISTS users`);
+        await db.query(`DROP TABLE IF EXISTS topics`);
+    }
+
+    async function createTables() {
+        await db.query(createTopicsQuery);
+        await db.query(createUsersQuery);
+        await db.query(createArticlesQuery);
+        await db.query(createCommentsQuery);
+    }
+
+    function insertTopicData() {
+        const queryString = format(
+            "INSERT INTO topics(slug, description, img_url) VALUES %L",
+            topicData.map(({ slug, description, img_url }) => {
+                return [slug, description, img_url];
+            })
+        );
+        return db.query(queryString);
+    }
+
+    function insertUserData() {
+        const queryString = format(
+            "INSERT INTO users(username, name, avatar_url) VALUES %L",
+            userData.map(({ username, name, avatar_url }) => {
+                return [username, name, avatar_url];
+            })
+        );
+        return db.query(queryString);
+    }
+
+    function insertArticleData() {
+        const formattedData = articleData.map(convertTimestampToDate);
+        const queryString = format(
+            "INSERT INTO articles(title, topic, author, body, created_at, votes, article_img_url) VALUES %L",
+            formattedData.map((article) => {
+                return [
+                    article.title,
+                    article.topic,
+                    article.author,
+                    article.body,
+                    article.created_at,
+                    article.votes,
+                    article.article_img_url,
                 ];
-                return array;
-            });
-            const query = format(
-                `INSERT INTO comments(article_id, body, votes, author, created_at)
-                VALUES %L`,
-                formattedData
-            );
-            return db.query(query);
-        });
-};
+            })
+        );
+        return db.query(queryString);
+    }
+    async function insertCommentData() {
+        const formattedData = commentData.map(convertTimestampToDate);
+        const queryString = format(
+            "INSERT INTO comments(article_id, body, votes, author, created_at) VALUES %L",
+            await Promise.all(
+                formattedData.map(async (comment) => {
+                    const ref = { key: "title", value: comment.article_title };
+                    return [
+                        await getRecordID("article_id", "articles", ref),
+                        comment.body,
+                        comment.votes,
+                        comment.author,
+                        comment.created_at,
+                    ];
+                })
+            )
+        );
+        return db.query(queryString);
+    }
+}
 
 module.exports = seed;
