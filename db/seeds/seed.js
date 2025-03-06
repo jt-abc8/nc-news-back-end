@@ -75,8 +75,13 @@ async function seed({ topicData, userData, articleData, commentData }) {
             await Promise.all(
                 formattedData.map(async (comment) => {
                     const ref = { key: "title", value: comment.article_title };
+                    const article_id = await getRecordID(
+                        "article_id",
+                        "articles",
+                        ref
+                    );
                     return [
-                        await getRecordID("article_id", "articles", ref),
+                        article_id,
                         comment.body,
                         comment.votes,
                         comment.author,
