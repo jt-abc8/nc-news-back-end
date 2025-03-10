@@ -30,6 +30,9 @@ describe("/api/topics", () => {
                     .get("/api/topics")
                     .expect(200)
                     .then(({ body: { topics } }) => {
+                        expect(Array.isArray(topics)).toBe(true);
+                        expect(topics.length).toBeGreaterThan(0);
+                        
                         topics.forEach(({ slug, description, img_url }) => {
                             expect(typeof slug).toBe("string");
                             expect(typeof description).toBe("string");
@@ -98,6 +101,7 @@ describe("/api/articles/:article_id", () => {
         });
     });
 });
+
 describe("/api/articles", () => {
     describe("GET", () => {
         describe("200 OK", () => {
