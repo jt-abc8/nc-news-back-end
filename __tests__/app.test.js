@@ -18,3 +18,30 @@ describe("GET /api", () => {
             });
     });
 });
+
+describe("GET /api/topics", () => {
+    describe("200 OK", () => {
+        test("Responds with an array of objects containing the data for each topic in the database", () => {
+            return request(app)
+                .get("/api/topics")
+                .expect(200)
+                .then(({ body: { topics } }) => {
+                    topics.forEach(({ slug, description, img_url }) => {
+                        expect(typeof slug).toBe("string");
+                        expect(typeof description).toBe("string");
+                        expect(typeof img_url).toBe("string");
+                    });
+                });
+        });
+    });
+});
+describe("404 Not Found", () => {
+    test("Responds with a 404 Not Found message when endpoint is not found", () => {
+        return request(app)
+            .get("/api/not-topics")
+            .expect(404)
+            .then(({ body: { msg } }) => {
+                expect(msg).toBe("404 Not Found");
+            });
+    });
+});
