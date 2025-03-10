@@ -1,7 +1,10 @@
 const express = require("express");
 const { getEndpoints } = require("./controllers/api.controller");
 const { getTopics } = require("./controllers/topics.controller");
-const { getArticleByID } = require("./controllers/articles.controller");
+const {
+    getArticleByID,
+    getArticles,
+} = require("./controllers/articles.controller");
 const {
     handleCustomErrors,
     handlePsqlErrors,
@@ -11,6 +14,7 @@ const app = express();
 
 app.get("/api", getEndpoints);
 app.get("/api/topics", getTopics);
+app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id", getArticleByID);
 app.all("/api/*", (req, res) => {
     res.status(404).send({ msg: "404 Not Found" });
