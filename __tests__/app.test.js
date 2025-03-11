@@ -155,6 +155,15 @@ describe("/api/articles/:article_id", () => {
 describe("/api/articles/:article_id/comments", () => {
     describe("GET", () => {
         describe("200 OK", () => {
+            test("Responds with an empty array when there are no comments on the relevant article", () => {
+                return request(app)
+                    .get("/api/articles/2/comments")
+                    .expect(200)
+                    .then(({ body: { comments } }) => {
+                        expect(Array.isArray(comments)).toBe(true);
+                        expect(comments.length).toBe(0);
+                    });
+            });
             test("returns the array of comments for a specfic article", () => {
                 return request(app)
                     .get("/api/articles/1/comments")
@@ -187,12 +196,22 @@ describe("/api/articles/:article_id/comments", () => {
             });
         });
         describe("404 Not Found", () => {
-            test("Responds with a 404 Not Found message when endpoint is not found", () => {
+            test("Responds with a 404 Not Found message when article_id is not found", () => {
                 return request(app)
-                    .get("/api/articles/1/not-comments")
+                    .get("/api/articles/627/comments")
                     .expect(404)
                     .then(({ body: { msg } }) => {
                         expect(msg).toBe("404 Not Found");
+                    });
+            });
+        });
+        describe("400 Bad Request", () => {
+            test("Responds with a 400 Bad Request message when the article_id is invalid", () => {
+                return request(app)
+                    .get("/api/articles/my-invalid-article/comments")
+                    .expect(400)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("400 Bad Request");
                     });
             });
         });
