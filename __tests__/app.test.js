@@ -216,4 +216,90 @@ describe("/api/articles/:article_id/comments", () => {
             });
         });
     });
+    describe("POST", () => {
+        describe("201 Created", () => {
+            test("adds a comment for the selected article", () => {
+                return request(app)
+                    .post("/api/articles/3/comments")
+                    .send({
+                        username: "butter_bridge",
+                        body: "i loved this article! very thought-provoking",
+                    })
+                    .expect(201)
+                    .then(({ body: { comment } }) => {
+                        expect(comment).toMatchObject({
+                            article_id: 3,
+                            body: "i loved this article! very thought-provoking",
+                            votes: 0,
+                            author: "butter_bridge",
+                            created_at: expect.any(String),
+                        });
+                    });
+            });
+        });
+        describe("400 Bad Request", () => {
+            test("responds with a bad request when comment data is incomplete", () => {
+                return request(app)
+                    .post("/api/articles/3/comments")
+                    .send({
+                        username: "butter_bridge",
+                    })
+                    .expect(400)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("400 Bad Request");
+                    });
+            });
+            test("responds with a bad request when sent username is a foreign key violation - i.e. wrong data type/does not exist in users table", () => {
+                const doesNotExist = request(app)
+                    .post("/api/articles/3/comments")
+                    .send({
+                        username: "jt",
+                        body: "don't you know who i am?!",
+                    })
+                    .expect(400)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("400 Bad Request");
+                    });
+
+                const wrongDataType = request(app)
+                    .post("/api/articles/3/comments")
+                    .send({
+                        username: new Date(),
+                        body: "what's the time",
+                    })
+                    .expect(400)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("400 Bad Request");
+                    });
+
+                return Promise.all([doesNotExist, wrongDataType]);
+            });
+            test("Responds with a 400 Bad Request message when the article_id is invalid", () => {
+                return request(app)
+                    .post("/api/articles/my-invalid-article/comments")
+                    .send({
+                        username: "butter_bridge",
+                        body: "i loved this article! very thought-provoking",
+                    })
+                    .expect(400)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("400 Bad Request");
+                    });
+            });
+        });
+        describe("404 Not Found", () => {
+            test("Responds with a 404 Not Found message when article_id is not found", () => {
+                return request(app)
+                    .post("/api/articles/627/comments")
+                    .send({
+                        username: "butter_bridge",
+                        body: "i loved this article! very thought-provoking",
+                    })
+                    .expect(404)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("404 Not Found");
+                    });
+            });
+        });
+    });
 });
