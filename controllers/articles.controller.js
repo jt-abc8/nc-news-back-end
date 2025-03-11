@@ -6,7 +6,7 @@ const {
 
 exports.getArticles = (req, res, next) => {
     selectArticles()
-        .then((articles) => appendCommentCount(articles))
+        // .then((articles) => appendCommentCount(articles))
         .then((articles) => res.status(200).send({ articles }))
         .catch((err) => next(err));
 };

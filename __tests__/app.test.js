@@ -65,8 +65,7 @@ describe("/api/articles", () => {
                     .expect(200)
                     .then(({ body: { articles } }) => {
                         expect(Array.isArray(articles)).toBe(true);
-                        expect(articles.length).toBeGreaterThan(0);
-
+                        expect(articles.length).toBe(13);
                         articles.forEach((article) => {
                             expect(article).not.toHaveProperty("body");
                             expect(article).toMatchObject({

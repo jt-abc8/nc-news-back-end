@@ -2,34 +2,13 @@ const db = require("../db/connection");
 
 exports.selectArticles = () => {
     return db
-        .query("SELECT * FROM articles ORDER BY created_at DESC")
-        .then(({ rows }) => {
-            return rows.map((row) => {
-                return {
-                    article_id: row.article_id,
-                    title: row.title,
-                    topic: row.topic,
-                    author: row.author,
-                    created_at: row.created_at,
-                    votes: row.votes,
-                    article_img_url: row.article_img_url,
-                };
-            });
-        });
-};
-
-exports.appendCommentCount = (articles) => {
-    const promises = articles.map((article) => {
-        return db
-            .query("SELECT * FROM comments WHERE article_id = $1", [
-                article.article_id,
-            ])
-            .then(({ rows }) => {
-                article.comment_count = rows.length;
-                return article;
-            });
-    });
-    return Promise.all(promises);
+        .query(
+            `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments)::INT AS comment_count FROM articles 
+            LEFT JOIN comments ON articles.article_id = comments.article_id
+            GROUP BY articles.article_id
+            ORDER BY articles.created_at DESC`
+        )
+        .then(({ rows }) => rows);
 };
 
 exports.selectArticleByID = (article_id) => {
