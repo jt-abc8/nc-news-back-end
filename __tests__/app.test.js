@@ -32,7 +32,7 @@ describe("/api/topics", () => {
                     .then(({ body: { topics } }) => {
                         expect(Array.isArray(topics)).toBe(true);
                         expect(topics.length).toBeGreaterThan(0);
-                        
+
                         topics.forEach(({ slug, description, img_url }) => {
                             expect(typeof slug).toBe("string");
                             expect(typeof description).toBe("string");
@@ -45,6 +45,56 @@ describe("/api/topics", () => {
             test("Responds with a 404 Not Found message when endpoint is not found", () => {
                 return request(app)
                     .get("/api/not-topics")
+                    .expect(404)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("404 Not Found");
+                    });
+            });
+        });
+    });
+});
+
+describe("/api/articles", () => {
+    describe("GET", () => {
+        describe("200 OK", () => {
+            test("responds with an array of objects containing the data for each article in the database", () => {
+                return request(app)
+                    .get("/api/articles")
+                    .expect(200)
+                    .then(({ body: { articles } }) => {
+                        expect(Array.isArray(articles)).toBe(true);
+                        expect(articles.length).toBeGreaterThan(0);
+
+                        articles.forEach((article) => {
+                            expect(typeof article.article_id).toBe("number");
+                            expect(typeof article.title).toBe("string");
+                            expect(typeof article.topic).toBe("string");
+                            expect(typeof article.author).toBe("string");
+                            expect(typeof article.created_at).toBe("string");
+                            expect(typeof article.votes).toBe("number");
+                            expect(typeof article.article_img_url).toBe(
+                                "string"
+                            );
+                            expect(typeof article.comment_count).toBe("number");
+                            expect(article.hasOwnProperty("body")).toBe(false);
+                        });
+                    });
+            });
+            test("the article array is sorted by date in descending order", () => {
+                return request(app)
+                    .get("/api/articles")
+                    .expect(200)
+                    .then(({ body: { articles } }) => {
+                        expect(articles).toBeSortedBy("created_at", {
+                            descending: true,
+                        });
+                    });
+            });
+        });
+        describe("404 Not Found", () => {
+            test("Responds with a 404 Not Found message when endpoint is not found", () => {
+                return request(app)
+                    .get("/api/not-articles")
                     .expect(404)
                     .then(({ body: { msg } }) => {
                         expect(msg).toBe("404 Not Found");
@@ -102,50 +152,4 @@ describe("/api/articles/:article_id", () => {
     });
 });
 
-describe("/api/articles", () => {
-    describe("GET", () => {
-        describe("200 OK", () => {
-            test("responds with an array of objects containing the data for each article in the database", () => {
-                return request(app)
-                    .get("/api/articles")
-                    .expect(200)
-                    .then(({ body: { articles } }) => {
-                        expect(Array.isArray(articles)).toBe(true);
-                        expect(articles.length).toBeGreaterThan(0);
 
-                        articles.forEach((article) => {
-                            expect(typeof article.article_id).toBe("number");
-                            expect(typeof article.title).toBe("string");
-                            expect(typeof article.topic).toBe("string");
-                            expect(typeof article.author).toBe("string");
-                            expect(typeof article.created_at).toBe("string");
-                            expect(typeof article.votes).toBe("number");
-                            expect(typeof article.article_img_url).toBe(
-                                "string"
-                            );
-                            expect(typeof article.comment_count).toBe("number");
-                            expect(article.hasOwnProperty("body")).toBe(false);
-                        });
-                    });
-            });
-            test("the article array is sorted by date in descending order", () => {
-                return request(app)
-                    .get("/api/articles")
-                    .expect(200)
-                    .then(({ body: { articles } }) => {
-                        expect(articles).toBeSortedBy("created_at");
-                    });
-            });
-        });
-        describe("404 Not Found", () => {
-            test("Responds with a 404 Not Found message when endpoint is not found", () => {
-                return request(app)
-                    .get("/api/not-articles")
-                    .expect(404)
-                    .then(({ body: { msg } }) => {
-                        expect(msg).toBe("404 Not Found");
-                    });
-            });
-        });
-    });
-});

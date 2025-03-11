@@ -2,7 +2,7 @@ const db = require("../db/connection");
 
 exports.selectArticles = () => {
     return db
-        .query("SELECT * FROM articles ORDER BY created_at")
+        .query("SELECT * FROM articles ORDER BY created_at DESC")
         .then(({ rows }) => {
             return rows.map((row) => {
                 return {
