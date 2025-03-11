@@ -152,4 +152,55 @@ describe("/api/articles/:article_id", () => {
     });
 });
 
-
+describe("/api/articles/:article_id/comments", () => {
+    describe("GET", () => {
+        describe("200 OK", () => {
+            test("returns the array of comments for a specfic article", () => {
+                return request(app)
+                    .get("/api/articles/1/comments")
+                    .expect(200)
+                    .then(({ body: { comments } }) => {
+                        expect(Array.isArray(comments)).toBe(true);
+                        expect(comments.length).toBe(11);
+                        comments.forEach(
+                            ({
+                                comment_id,
+                                votes,
+                                created_at,
+                                author,
+                                body,
+                                article_id,
+                            }) => {
+                                expect(typeof comment_id).toBe("number");
+                                expect(typeof votes).toBe("number");
+                                expect(typeof created_at).toBe("string");
+                                expect(typeof author).toBe("string");
+                                expect(typeof body).toBe("string");
+                                expect(typeof article_id).toBe("number");
+                            }
+                        );
+                    });
+            });
+            test("ordered by most recent comments - i.e. date in descending order", () => {
+                return request(app)
+                    .get("/api/articles/1/comments")
+                    .expect(200)
+                    .then(({ body: { comments } }) => {
+                        expect(comments).toBeSortedBy("created_at", {
+                            descending: true,
+                        });
+                    });
+            });
+        });
+        describe("404 Not Found", () => {
+            test("Responds with a 404 Not Found message when endpoint is not found", () => {
+                return request(app)
+                    .get("/api/articles/1/not-comments")
+                    .expect(404)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("404 Not Found");
+                    });
+            });
+        });
+    });
+});
