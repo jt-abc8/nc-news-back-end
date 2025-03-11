@@ -33,10 +33,12 @@ describe("/api/topics", () => {
                         expect(Array.isArray(topics)).toBe(true);
                         expect(topics.length).toBeGreaterThan(0);
 
-                        topics.forEach(({ slug, description, img_url }) => {
-                            expect(typeof slug).toBe("string");
-                            expect(typeof description).toBe("string");
-                            expect(typeof img_url).toBe("string");
+                        topics.forEach((topic) => {
+                            expect(topic).toMatchObject({
+                                slug: expect.any(String),
+                                description: expect.any(String),
+                                img_url: expect.any(String),
+                            });
                         });
                     });
             });
@@ -66,17 +68,17 @@ describe("/api/articles", () => {
                         expect(articles.length).toBeGreaterThan(0);
 
                         articles.forEach((article) => {
-                            expect(typeof article.article_id).toBe("number");
-                            expect(typeof article.title).toBe("string");
-                            expect(typeof article.topic).toBe("string");
-                            expect(typeof article.author).toBe("string");
-                            expect(typeof article.created_at).toBe("string");
-                            expect(typeof article.votes).toBe("number");
-                            expect(typeof article.article_img_url).toBe(
-                                "string"
-                            );
-                            expect(typeof article.comment_count).toBe("number");
-                            expect(article.hasOwnProperty("body")).toBe(false);
+                            expect(article).not.toHaveProperty("body");
+                            expect(article).toMatchObject({
+                                article_id: expect.any(Number),
+                                title: expect.any(String),
+                                topic: expect.any(String),
+                                author: expect.any(String),
+                                created_at: expect.any(String),
+                                votes: expect.any(Number),
+                                article_img_url: expect.any(String),
+                                comment_count: expect.any(Number),
+                            });
                         });
                     });
             });
@@ -115,17 +117,16 @@ describe("/api/articles/:article_id", () => {
                         const expected = convertTimestampToDate(
                             data.articleData[3]
                         );
-
-                        expect(article.article_id).toBe(4);
-                        expect(article.title).toBe(expected.title);
-                        expect(article.topic).toBe(expected.topic);
-                        expect(article.author).toBe(expected.author);
-                        expect(article.body).toBe(expected.body);
-                        expect(typeof article.created_at).toBe("string"); //!
-                        expect(article.votes).toBe(expected.votes);
-                        expect(article.article_img_url).toBe(
-                            expected.article_img_url
-                        );
+                        expect(article).toMatchObject({
+                            article_id: 4,
+                            title: expected.title,
+                            topic: expected.topic,
+                            author: expected.author,
+                            body: expected.body,
+                            created_at: expect.any(String),
+                            votes: expected.votes,
+                            article_img_url: expected.article_img_url,
+                        });
                     });
             });
         });
@@ -162,23 +163,17 @@ describe("/api/articles/:article_id/comments", () => {
                     .then(({ body: { comments } }) => {
                         expect(Array.isArray(comments)).toBe(true);
                         expect(comments.length).toBe(11);
-                        comments.forEach(
-                            ({
-                                comment_id,
-                                votes,
-                                created_at,
-                                author,
-                                body,
-                                article_id,
-                            }) => {
-                                expect(typeof comment_id).toBe("number");
-                                expect(typeof votes).toBe("number");
-                                expect(typeof created_at).toBe("string");
-                                expect(typeof author).toBe("string");
-                                expect(typeof body).toBe("string");
-                                expect(typeof article_id).toBe("number");
-                            }
-                        );
+
+                        comments.forEach((comment) => {
+                            expect(comment).toMatchObject({
+                                comment_id: expect.any(Number),
+                                votes: expect.any(Number),
+                                created_at: expect.any(String),
+                                author: expect.any(String),
+                                body: expect.any(String),
+                                article_id: expect.any(Number),
+                            });
+                        });
                     });
             });
             test("ordered by most recent comments - i.e. date in descending order", () => {
