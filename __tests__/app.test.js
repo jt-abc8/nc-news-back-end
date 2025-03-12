@@ -113,7 +113,7 @@ describe("/api/articles/:article_id", () => {
                     .get("/api/articles/4")
                     .expect(200)
                     .then(({ body: { article } }) => {
-                        const expected = convertTimestampToDate(data.articleData[3]);
+                        const expected = data.articleData[3];
                         expect(article).toMatchObject({
                             article_id: 4,
                             title: expected.title,
@@ -158,7 +158,7 @@ describe("/api/articles/:article_id", () => {
                     })
                     .expect(200)
                     .then(({ body: { article } }) => {
-                        const expected = convertTimestampToDate(data.articleData[0]);
+                        const expected = data.articleData[0];
                         expect(article).toMatchObject({
                             article_id: 1,
                             title: expected.title,
