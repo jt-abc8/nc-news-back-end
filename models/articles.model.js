@@ -1,4 +1,5 @@
 const db = require("../db/connection");
+const { checkExists } = require("../db/seeds/utils");
 
 exports.selectArticles = () => {
     return db
@@ -12,11 +13,31 @@ exports.selectArticles = () => {
 };
 
 exports.selectArticleByID = (article_id) => {
-    return db
-        .query("SELECT * FROM articles WHERE article_id = $1", [article_id])
-        .then(({ rows }) => {
-            return rows.length > 0
-                ? rows[0]
-                : Promise.reject({ status: 404, msg: "404 Not Found" });
+    return db.query("SELECT * FROM articles WHERE article_id = $1", [article_id]).then(({ rows }) => {
+        return rows.length > 0 ? rows[0] : Promise.reject({ status: 404, msg: "404 Not Found" });
+    });
+};
+
+exports.updateArticleVotes = (article_id, inc_votes) => {
+    if (!inc_votes) {
+        return Promise.reject({ status: 400, msg: "400 Bad Request" });
+    } else {
+        return checkExists("articles", "article_id", article_id).then((exists) => {
+            if (exists) {
+                return db
+                    .query(
+                        `UPDATE articles
+                        SET votes = votes + $1
+                        WHERE article_id = $2 RETURNING *`,
+                        [inc_votes, article_id]
+                    )
+                    .then(({ rows }) => rows[0]);
+            } else {
+                return Promise.reject({
+                    status: 404,
+                    msg: "404 Not Found",
+                });
+            }
         });
+    }
 };
