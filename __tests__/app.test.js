@@ -378,7 +378,7 @@ describe("/api/articles/:article_id/comments", () => {
 });
 
 describe("/api/comments/:comment_id", () => {
-    describe.only("DELETE", () => {
+    describe("DELETE", () => {
         describe("204 no content", () => {
             test("responds with 204 when comment is succesfully deleted", () => {
                 return request(app)
@@ -403,6 +403,40 @@ describe("/api/comments/:comment_id", () => {
             test("responds with not found when comment does not exist in database", () => {
                 return request(app)
                     .delete("/api/comments/5000")
+                    .expect(404)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("404 Not Found");
+                    });
+            });
+        });
+    });
+});
+
+describe("/api/users", () => {
+    describe("GET", () => {
+        describe("200 OK", () => {
+            test("responds with an array of objects containing the data for each user in the database", () => {
+                return request(app)
+                    .get("/api/users")
+                    .expect(200)
+                    .then(({ body: { users } }) => {
+                        expect(Array.isArray(users)).toBe(true);
+                        expect(users.length).toBeGreaterThan(0);
+
+                        users.forEach((user) => {
+                            expect(user).toMatchObject({
+                                username: expect.any(String),
+                                name: expect.any(String),
+                                avatar_url: expect.any(String),
+                            });
+                        });
+                    });
+            });
+        });
+        describe("404 Not Found", () => {
+            test("Responds with a 404 Not Found message when endpoint is not found", () => {
+                return request(app)
+                    .get("/api/not-users")
                     .expect(404)
                     .then(({ body: { msg } }) => {
                         expect(msg).toBe("404 Not Found");
