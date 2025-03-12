@@ -1,4 +1,8 @@
-const { convertTimestampToDate, getRecordID } = require("../db/seeds/utils");
+const {
+    convertTimestampToDate,
+    getRecordID,
+    checkExists,
+} = require("../db/seeds/utils");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data/index");
@@ -55,5 +59,18 @@ describe("getRecordID", () => {
         const ref = { key: "title", value: article_title };
         const result = await getRecordID("article_id", "articles", ref);
         expect(result).toBe(3);
+    });
+});
+
+describe("checkExists", () => {
+    test("returns false if the record does not exist", () => {
+        return checkExists("topics", "slug", "twin peaks").then((result) => {
+            expect(result).toBe(false);
+        });
+    });
+    test("returns true if the record exists", () => {
+        return checkExists("topics", "slug", "mitch").then((result) => {
+            expect(result).toBe(true);
+        });
     });
 });

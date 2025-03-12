@@ -2,6 +2,7 @@ const {
     selectArticles,
     selectArticleByID,
     appendCommentCount,
+    updateArticleVotes,
 } = require("../models/articles.model");
 
 exports.getArticles = (req, res, next) => {
@@ -17,3 +18,10 @@ exports.getArticleByID = (req, res, next) => {
         .catch((err) => next(err));
 };
 
+exports.patchArticleVotes = (req, res, next) => {
+    const { article_id } = req.params;
+    const { inc_votes } = req.body;
+    updateArticleVotes(article_id, inc_votes)
+        .then((article) => res.status(200).send({ article }))
+        .catch((err) => next(err));
+};

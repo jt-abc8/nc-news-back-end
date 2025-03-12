@@ -14,3 +14,10 @@ exports.getRecordID = async (idKey, tableName, ref) => {
     }, {});
     return lookup[ref.value];
 };
+
+exports.checkExists = (table, column, value) => {
+    const queryStr = format(`SELECT * FROM %I where %I = $1`, table, column);
+    return db.query(queryStr, [value]).then(({ rows }) => {
+        return rows.length > 0;
+    });
+};

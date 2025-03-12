@@ -9,3 +9,8 @@ exports.handlePsqlErrors = (err, req, res, next) => {
         ? res.status(400).send({ msg: "400 Bad Request" })
         : next(err);
 };
+
+exports.handleServerErrors = (err, req, res) => {
+    console.log(err);
+    res.status(500).send({ msg: "500 Internal Server Error" });
+};

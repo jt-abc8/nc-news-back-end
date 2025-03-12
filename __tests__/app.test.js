@@ -150,6 +150,83 @@ describe("/api/articles/:article_id", () => {
             });
         });
     });
+    describe("PATCH", () => {
+        describe("200 OK", () => {
+            test("increments the selected article's votes property and returns the updated article data", () => {
+                return request(app)
+                    .patch("/api/articles/1")
+                    .send({
+                        inc_votes: 5,
+                    })
+                    .expect(200)
+                    .then(({ body: { article } }) => {
+                        const expected = convertTimestampToDate(
+                            data.articleData[0]
+                        );
+                        expect(article).toMatchObject({
+                            article_id: 1,
+                            title: expected.title,
+                            topic: expected.topic,
+                            author: expected.author,
+                            body: expected.body,
+                            created_at: expect.any(String),
+                            votes: 105,
+                            article_img_url: expected.article_img_url,
+                        });
+                    });
+            });
+        });
+        describe("400 bad request", () => {
+            test("responds with a bad request if inc_votes property is missing", () => {
+                return request(app)
+                .patch("/api/articles/1")
+                .send({
+                    wrong_property: 5,
+                })
+                .expect(400)
+                .then(({body:{msg}})=>{
+                    expect(msg).toBe("400 Bad Request")
+                })
+            });
+
+            test("responds with a bad request if inc_votes property is wrong data type", () => {
+                return request(app)
+                .patch("/api/articles/1")
+                .send({
+                    inc_votes: "wrong data type",
+                })
+                .expect(400)
+                .then(({body:{msg}})=>{
+                    expect(msg).toBe("400 Bad Request")
+                })
+            });
+
+            test("Responds with a 400 Bad Request message when article_id parameter is invalid", () => {
+                return request(app)
+                    .patch("/api/articles/not-a-valid-article")
+                    .send({
+                        inc_votes: 5,
+                    })
+                    .expect(400)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("400 Bad Request");
+                    });
+            });
+        });
+        describe("404 Not Found", () => {
+            test("Responds with a 404 Not Found message when article is not found", () => {
+                return request(app)
+                    .patch("/api/articles/412")
+                    .send({
+                        inc_votes: 5,
+                    })
+                    .expect(404)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("404 Not Found");
+                    });
+            });
+        })
+    });
 });
 
 describe("/api/articles/:article_id/comments", () => {
