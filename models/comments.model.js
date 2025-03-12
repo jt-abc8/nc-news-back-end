@@ -38,3 +38,16 @@ exports.insertComment = (article_id, username, body) => {
         });
     }
 };
+
+exports.sqlDeleteComment = (comment_id) => {
+    return checkExists("comments", "comment_id", comment_id).then((exists) => {
+        if (exists) {
+            return db.query(`DELETE FROM comments WHERE comment_id = $1`, [comment_id]);
+        } else {
+            return Promise.reject({
+                status: 404,
+                msg: "404 Not Found",
+            });
+        }
+    });
+};

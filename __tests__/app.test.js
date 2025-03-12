@@ -113,9 +113,7 @@ describe("/api/articles/:article_id", () => {
                     .get("/api/articles/4")
                     .expect(200)
                     .then(({ body: { article } }) => {
-                        const expected = convertTimestampToDate(
-                            data.articleData[3]
-                        );
+                        const expected = data.articleData[3];
                         expect(article).toMatchObject({
                             article_id: 4,
                             title: expected.title,
@@ -160,9 +158,7 @@ describe("/api/articles/:article_id", () => {
                     })
                     .expect(200)
                     .then(({ body: { article } }) => {
-                        const expected = convertTimestampToDate(
-                            data.articleData[0]
-                        );
+                        const expected = data.articleData[0];
                         expect(article).toMatchObject({
                             article_id: 1,
                             title: expected.title,
@@ -179,26 +175,26 @@ describe("/api/articles/:article_id", () => {
         describe("400 bad request", () => {
             test("responds with a bad request if inc_votes property is missing", () => {
                 return request(app)
-                .patch("/api/articles/1")
-                .send({
-                    wrong_property: 5,
-                })
-                .expect(400)
-                .then(({body:{msg}})=>{
-                    expect(msg).toBe("400 Bad Request")
-                })
+                    .patch("/api/articles/1")
+                    .send({
+                        wrong_property: 5,
+                    })
+                    .expect(400)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("400 Bad Request");
+                    });
             });
 
             test("responds with a bad request if inc_votes property is wrong data type", () => {
                 return request(app)
-                .patch("/api/articles/1")
-                .send({
-                    inc_votes: "wrong data type",
-                })
-                .expect(400)
-                .then(({body:{msg}})=>{
-                    expect(msg).toBe("400 Bad Request")
-                })
+                    .patch("/api/articles/1")
+                    .send({
+                        inc_votes: "wrong data type",
+                    })
+                    .expect(400)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("400 Bad Request");
+                    });
             });
 
             test("Responds with a 400 Bad Request message when article_id parameter is invalid", () => {
@@ -225,7 +221,7 @@ describe("/api/articles/:article_id", () => {
                         expect(msg).toBe("404 Not Found");
                     });
             });
-        })
+        });
     });
 });
 
@@ -372,6 +368,41 @@ describe("/api/articles/:article_id/comments", () => {
                         username: "butter_bridge",
                         body: "i loved this article! very thought-provoking",
                     })
+                    .expect(404)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("404 Not Found");
+                    });
+            });
+        });
+    });
+});
+
+describe("/api/comments/:comment_id", () => {
+    describe.only("DELETE", () => {
+        describe("204 no content", () => {
+            test("responds with 204 when comment is succesfully deleted", () => {
+                return request(app)
+                    .delete("/api/comments/6")
+                    .expect(204)
+                    .then((res) => {
+                        expect(res.noContent).toBe(true);
+                    });
+            });
+        });
+        describe("400 bad request", () => {
+            test("responds with a bad request when comment id is wrong data type", () => {
+                return request(app)
+                    .delete("/api/comments/not-valid")
+                    .expect(400)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("400 Bad Request");
+                    });
+            });
+        });
+        describe("404 not found", () => {
+            test("responds with not found when comment does not exist in database", () => {
+                return request(app)
+                    .delete("/api/comments/5000")
                     .expect(404)
                     .then(({ body: { msg } }) => {
                         expect(msg).toBe("404 Not Found");
