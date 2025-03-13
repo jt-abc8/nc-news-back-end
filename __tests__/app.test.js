@@ -157,6 +157,42 @@ describe("/api/articles", () => {
                             });
                     });
                 });
+
+                describe("topic", () => {
+                    test("responds with an empty array if there are no articles on the specified topic", () => {
+                        return request(app)
+                            .get(`/api/articles?topic=paper`)
+                            .expect(200)
+                            .then(({ body: { articles } }) => {
+                                expect(articles.length).toBe(0);
+                            });
+                    });
+                    test("responds with only the articles on the specified topic", () => {
+                        const mitch = request(app)
+                            .get(`/api/articles?topic=mitch`)
+                            .expect(200)
+                            .then(({ body: { articles } }) => {
+                                expect(articles.length).toBe(12);
+
+                                articles.forEach(({ topic }) => {
+                                    expect(topic).toBe("mitch");
+                                });
+                            });
+
+                        const cats = request(app)
+                            .get(`/api/articles?topic=cats`)
+                            .expect(200)
+                            .then(({ body: { articles } }) => {
+                                expect(articles.length).toBe(1);
+
+                                articles.forEach(({ topic }) => {
+                                    expect(topic).toBe("cats");
+                                });
+                            });
+
+                        return Promise.all([mitch, cats]);
+                    });
+                });
             });
         });
 
@@ -168,6 +204,19 @@ describe("/api/articles", () => {
                     .then(({ body: { msg } }) => {
                         expect(msg).toBe("404 Not Found");
                     });
+            });
+
+            describe("queries", () => {
+                describe("topic", () => {
+                    test("Responds with 404 Not Found when topic query value does not exist in database", () => {
+                        return request(app)
+                            .get("/api/articles?topic=twin-peaks")
+                            .expect(404)
+                            .then(({ body: { msg } }) => {
+                                expect(msg).toBe("404 Not Found");
+                            });
+                    });
+                });
             });
         });
 

@@ -2,26 +2,38 @@ const db = require("../db/connection");
 const { checkExists } = require("../db/seeds/utils");
 const format = require("pg-format");
 
-exports.selectArticles = (sort_by, order) => {
+exports.selectArticles = async (sort_by, order, topic) => {
     sort_by ??= "created_at";
     const defaultDescending = ["votes", "created_at"];
     order ??= defaultDescending.includes(sort_by) ? "desc" : "asc";
-
+    
     const validSorts = ["title", "topic", "author", "votes", "created_at"];
     const validOrder = ["asc", "desc"];
     if (!validSorts.includes(sort_by) || !validOrder.includes(order)) {
         return Promise.reject({ status: 400, msg: "400 Bad Request" });
     }
+    
+    let queryStr = `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments)::INT AS comment_count FROM articles 
+    LEFT JOIN comments ON articles.article_id = comments.article_id`;
+    
+    const queryParams = [];
+    if (topic) {
+        const exists = await checkExists("topics", "slug", topic);
+        if (exists) {
+            queryStr += " WHERE articles.topic = $1";
+            queryParams.push(topic);
+        } else {
+            return Promise.reject({ status: 404, msg: "404 Not Found" });
+        }
+    }
 
-    const queryStr = format(
-        `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments)::INT AS comment_count FROM articles 
-            LEFT JOIN comments ON articles.article_id = comments.article_id
-            GROUP BY articles.article_id
-            ORDER BY articles.%I %s`,
+    queryStr += format(
+        ` GROUP BY articles.article_id
+        ORDER BY articles.%I %s`,
         sort_by,
         order.toUpperCase()
     );
-    return db.query(queryStr).then(({ rows }) => rows);
+    return db.query(queryStr, queryParams).then(({ rows }) => rows);
 };
 
 exports.selectArticleByID = (article_id) => {
