@@ -122,6 +122,41 @@ describe("/api/articles", () => {
                         return sortBy("votes", "descending");
                     });
                 });
+
+                describe("order", () => {
+                    test("sorts by ascending order", () => {
+                        return request(app)
+                            .get(`/api/articles?order=asc`)
+                            .expect(200)
+                            .then(({ body: { articles } }) => {
+                                expect(articles).toBeSortedBy("created_at", { ascending: true });
+                            });
+                    });
+                    test("sorts by descending order", () => {
+                        return request(app)
+                            .get(`/api/articles?order=desc`)
+                            .expect(200)
+                            .then(({ body: { articles } }) => {
+                                expect(articles).toBeSortedBy("created_at", { descending: true });
+                            });
+                    });
+                    test("sorts by ascending order when paired with sort_by query", () => {
+                        return request(app)
+                            .get(`/api/articles?sort_by=votes&order=asc`)
+                            .expect(200)
+                            .then(({ body: { articles } }) => {
+                                expect(articles).toBeSortedBy("votes", { ascending: true });
+                            });
+                    });
+                    test("sorts by descending order when paired with sort_by query", () => {
+                        return request(app)
+                            .get(`/api/articles?sort_by=author&order=desc`)
+                            .expect(200)
+                            .then(({ body: { articles } }) => {
+                                expect(articles).toBeSortedBy("author", { descending: true });
+                            });
+                    });
+                });
             });
         });
 
@@ -142,6 +177,33 @@ describe("/api/articles", () => {
                     test("Responds with 400 Bad Request when sort_by query is invalid", () => {
                         return request(app)
                             .get("/api/articles?sort_by=not-valid")
+                            .expect(400)
+                            .then(({ body: { msg } }) => {
+                                expect(msg).toBe("400 Bad Request");
+                            });
+                    });
+
+                    test("Responds with 400 Bad Request when sort_by query is invalid, even when paired with valid order query", () => {
+                        return request(app)
+                            .get("/api/articles?sort_by=not-valid&order=asc")
+                            .expect(400)
+                            .then(({ body: { msg } }) => {
+                                expect(msg).toBe("400 Bad Request");
+                            });
+                    });
+                });
+                describe("order", () => {
+                    test("Responds with 400 Bad Request when order query is invalid", () => {
+                        return request(app)
+                            .get("/api/articles?order=wacky-random-order-pls")
+                            .expect(400)
+                            .then(({ body: { msg } }) => {
+                                expect(msg).toBe("400 Bad Request");
+                            });
+                    });
+                    test("Responds with 400 Bad Request when order query is invalid, even when paired with valid sort_by query", () => {
+                        return request(app)
+                            .get("/api/articles?sort_by=title&order=wacky-random-order-pls")
                             .expect(400)
                             .then(({ body: { msg } }) => {
                                 expect(msg).toBe("400 Bad Request");
