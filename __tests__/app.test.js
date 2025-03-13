@@ -285,6 +285,30 @@ describe("/api/articles/:article_id", () => {
                         });
                     });
             });
+            test("Response data includes a comment_count property, which provides the total count of all the comments with the matching article_id", () => {
+                const article1 = request(app)
+                    .get("/api/articles/1")
+                    .expect(200)
+                    .then(({ body: { article } }) => {
+                        expect(article.comment_count).toBe(11);
+                    });
+
+                const article2 = request(app)
+                    .get("/api/articles/9")
+                    .expect(200)
+                    .then(({ body: { article } }) => {
+                        expect(article.comment_count).toBe(2);
+                    });
+
+                const article3 = request(app)
+                    .get("/api/articles/2")
+                    .expect(200)
+                    .then(({ body: { article } }) => {
+                        expect(article.comment_count).toBe(0);
+                    });
+
+                return Promise.all([article1, article2, article3]);
+            });
         });
         describe("404 Not Found", () => {
             test("Responds with a 404 Not Found message when article is not found", () => {
