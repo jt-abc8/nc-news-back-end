@@ -81,7 +81,7 @@ describe("/api/articles", () => {
                         });
                     });
             });
-            test("the article array is sorted by date in descending order", () => {
+            test("the article array is sorted by date in descending order by default", () => {
                 return request(app)
                     .get("/api/articles")
                     .expect(200)
@@ -91,7 +91,40 @@ describe("/api/articles", () => {
                         });
                     });
             });
+
+            describe("queries", () => {
+                describe("sort_by", () => {
+                    const sortBy = (column, property) => {
+                        return request(app)
+                            .get(`/api/articles?sort_by=${column}`)
+                            .expect(200)
+                            .then(({ body: { articles } }) => {
+                                const orderCondition = {};
+                                orderCondition[property] = true;
+                                expect(articles).toBeSortedBy(column, orderCondition);
+                            });
+                    };
+
+                    test("sorts the response by title, default ascending", () => {
+                        return sortBy("title", "ascending");
+                    });
+
+                    test("sorts the response by topic, default ascending", () => {
+                        return sortBy("topic", "ascending");
+                    });
+                    test("sorts the response by author, default ascending", () => {
+                        return sortBy("author", "ascending");
+                    });
+                    test("sorts the response by created_at, default descending", () => {
+                        return sortBy("created_at", "descending");
+                    });
+                    test("sorts the response by votes, default descending", () => {
+                        return sortBy("votes", "descending");
+                    });
+                });
+            });
         });
+
         describe("404 Not Found", () => {
             test("Responds with a 404 Not Found message when endpoint is not found", () => {
                 return request(app)
@@ -100,6 +133,21 @@ describe("/api/articles", () => {
                     .then(({ body: { msg } }) => {
                         expect(msg).toBe("404 Not Found");
                     });
+            });
+        });
+
+        describe("400 Bad Request", () => {
+            describe("queries", () => {
+                describe("sort_by", () => {
+                    test("Responds with 400 Bad Request when sort_by query is invalid", () => {
+                        return request(app)
+                            .get("/api/articles?sort_by=not-valid")
+                            .expect(400)
+                            .then(({ body: { msg } }) => {
+                                expect(msg).toBe("400 Bad Request");
+                            });
+                    });
+                });
             });
         });
     });

@@ -1,12 +1,8 @@
-const {
-    selectArticles,
-    selectArticleByID,
-    appendCommentCount,
-    updateArticleVotes,
-} = require("../models/articles.model");
+const { selectArticles, selectArticleByID, updateArticleVotes } = require("../models/articles.model");
 
 exports.getArticles = (req, res, next) => {
-    selectArticles()
+    const { sort_by } = req.query;
+    selectArticles(sort_by)
         .then((articles) => res.status(200).send({ articles }))
         .catch((err) => next(err));
 };
