@@ -1,15 +1,25 @@
 const db = require("../db/connection");
 const { checkExists } = require("../db/seeds/utils");
+const format = require("pg-format");
 
-exports.selectArticles = () => {
-    return db
-        .query(
-            `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments)::INT AS comment_count FROM articles 
+exports.selectArticles = (sort_by) => {
+    sort_by ??= "created_at";
+    const orderQuery = sort_by === "votes" || sort_by === "created_at" ? "DESC" : "ASC";
+    
+    const validSorts = ["title", "topic", "author", "votes", "created_at"];
+    if (!validSorts.includes(sort_by)) {
+        return Promise.reject({ status: 400, msg: "400 Bad Request" });
+    }
+    
+    const queryStr = format(
+        `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments)::INT AS comment_count FROM articles 
             LEFT JOIN comments ON articles.article_id = comments.article_id
             GROUP BY articles.article_id
-            ORDER BY articles.created_at DESC`
-        )
-        .then(({ rows }) => rows);
+            ORDER BY articles.%I %s`,
+        sort_by,
+        orderQuery
+    );
+    return db.query(queryStr).then(({ rows }) => rows);
 };
 
 exports.selectArticleByID = (article_id) => {
