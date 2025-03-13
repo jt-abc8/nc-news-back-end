@@ -2,22 +2,24 @@ const db = require("../db/connection");
 const { checkExists } = require("../db/seeds/utils");
 const format = require("pg-format");
 
-exports.selectArticles = (sort_by) => {
+exports.selectArticles = (sort_by, order) => {
     sort_by ??= "created_at";
-    const orderQuery = sort_by === "votes" || sort_by === "created_at" ? "DESC" : "ASC";
-    
+    const defaultDescending = ["votes", "created_at"];
+    order ??= defaultDescending.includes(sort_by) ? "desc" : "asc";
+
     const validSorts = ["title", "topic", "author", "votes", "created_at"];
-    if (!validSorts.includes(sort_by)) {
+    const validOrder = ["asc", "desc"];
+    if (!validSorts.includes(sort_by) || !validOrder.includes(order)) {
         return Promise.reject({ status: 400, msg: "400 Bad Request" });
     }
-    
+
     const queryStr = format(
         `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments)::INT AS comment_count FROM articles 
             LEFT JOIN comments ON articles.article_id = comments.article_id
             GROUP BY articles.article_id
             ORDER BY articles.%I %s`,
         sort_by,
-        orderQuery
+        order.toUpperCase()
     );
     return db.query(queryStr).then(({ rows }) => rows);
 };
