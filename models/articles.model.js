@@ -46,7 +46,6 @@ exports.selectArticleByID = (article_id) => {
             [article_id]
         )
         .then(({ rows }) => {
-            console.log(rows);
             return rows.length > 0 ? rows[0] : Promise.reject({ status: 404, msg: "404 Not Found" });
         });
 };
