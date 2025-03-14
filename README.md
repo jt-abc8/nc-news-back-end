@@ -14,7 +14,7 @@ Run the following command in your terminal:
 ### 2. Install dependencies
 This project uses [Express](https://expressjs.com/), [node-postgres](https://node-postgres.com/), [dotenv](https://github.com/motdotla/dotenv) and [pg-format](https://github.com/datalanche/node-pg-format). 
 
-The dev dependencies used for testing include [Jest](https://jestjs.io/), SuperTest(https://github.com/ladjs/supertest) and [Husky](https://github.com/typicode/husky). 
+The dev dependencies used for testing include [Jest](https://jestjs.io/), [SuperTest](https://github.com/ladjs/supertest) and [Husky](https://github.com/typicode/husky). 
 
 Navigate to the project folder in your terminal and then run `npm i` to install them all.
 
