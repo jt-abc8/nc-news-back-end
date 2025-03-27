@@ -1,8 +1,7 @@
-const { selectCommentsByArticleID, insertComment, sqlDeleteComment } = require("../models/comments.model");
+const { selectComments, insertComment, sqlDeleteComment } = require("../models/comments.model");
 
-exports.getCommentsByArticleID = (req, res, next) => {
-    const { article_id } = req.params;
-    selectCommentsByArticleID(article_id)
+exports.getComments = (req, res, next) => {
+    selectComments(req.params)
         .then((comments) => res.status(200).send({ comments }))
         .catch((err) => next(err));
 };
