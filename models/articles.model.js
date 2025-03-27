@@ -1,5 +1,5 @@
 const db = require("../db/connection");
-const { checkExists } = require("../db/seeds/utils");
+const { checkExists } = require("../utils");
 const format = require("pg-format");
 
 exports.selectArticles = async (sort_by, order, topic) => {

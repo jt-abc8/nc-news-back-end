@@ -1,4 +1,4 @@
-const db = require("../connection");
+const db = require("./db/connection");
 const format = require("pg-format");
 
 exports.convertTimestampToDate = ({ created_at, ...otherProperties }) => {

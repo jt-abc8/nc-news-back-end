@@ -2,7 +2,7 @@ const {
    convertTimestampToDate,
    getRecordID,
    checkExists,
-} = require("../db/seeds/utils");
+} = require("../utils");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data/index");

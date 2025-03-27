@@ -1,5 +1,5 @@
 const db = require("../db/connection");
-const { checkExists } = require("../db/seeds/utils");
+const { checkExists } = require("../utils");
 
 exports.selectComments= ({article_id}) => {
     return checkExists("articles", "article_id", article_id)

@@ -1,6 +1,6 @@
 const db = require("../connection");
 const format = require("pg-format");
-const { convertTimestampToDate, getRecordID } = require("./utils");
+const { convertTimestampToDate, getRecordID } = require("../../utils");
 const {
     createTopicsQuery,
     createUsersQuery,

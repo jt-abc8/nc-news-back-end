@@ -1,5 +1,5 @@
 const db = require("../db/connection");
-const { checkExists } = require("../db/seeds/utils");
+const { checkExists } = require("../utils");
 
 exports.selectUsers = ({ username }) => {
    if (username) {
