@@ -1,7 +1,7 @@
 const { selectUsers } = require("../models/users.model");
 
 exports.getUsers = (req, res, next) => {
-    selectUsers()
-        .then((users) => res.status(200).send({ users }))
-        .catch((err) => next(err));
+   selectUsers(req.params)
+      .then((userObj) => res.status(200).send(userObj))
+      .catch((err) => next(err));
 };
