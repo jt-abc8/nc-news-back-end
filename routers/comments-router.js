@@ -6,6 +6,9 @@ commentsRouter
    .get(controller.getComments)
    .post(controller.postComment);
 
-commentsRouter.delete("/:comment_id", controller.deleteComment);
+commentsRouter
+   .route("/:comment_id")
+   .delete(controller.deleteComment)
+   .patch(controller.patchCommentVotes);
 
 module.exports = commentsRouter;

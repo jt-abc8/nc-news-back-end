@@ -656,14 +656,97 @@ describe("/api/users/:username", () => {
          });
       });
       describe("404 Not Found", () => {
-        test("Responds with a 404 Not Found message when endpoint is not found (username does not exist in database)", () => {
+         test("Responds with a 404 Not Found message when endpoint is not found (username does not exist in database)", () => {
             return request(app)
                .get("/api/users/mr-not-a-username-362")
                .expect(404)
                .then(({ body: { msg } }) => {
                   expect(msg).toBe("404 Not Found");
                });
-        })
-      })
+         });
+      });
+   });
+
+   describe("PATCH", () => {
+      describe("200 OK", () => {
+         test("increments the selected comment's votes property and returns the updated comment data", () => {
+            return request(app)
+               .patch("/api/comments/2")
+               .send({ inc_votes: 1 })
+               .expect(200)
+               .then(({ body: { comment } }) => {
+                  expect(comment).toMatchObject({
+                     article_id: 1,
+                     body: "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+                     votes: 15,
+                     author: "butter_bridge",
+                     created_at: expect.any(String),
+                  });
+               });
+         });
+         test("decrements the selected comment's votes property and returns the updated comment data", () => {
+            return request(app)
+               .patch("/api/comments/2")
+               .send({ inc_votes: -1 })
+               .expect(200)
+               .then(({ body: { comment } }) => {
+                  expect(comment).toMatchObject({
+                     article_id: 1,
+                     body: "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+                     votes: 13,
+                     author: "butter_bridge",
+                     created_at: expect.any(String),
+                  });
+               });
+         });
+      });
+      describe("400 Bad Request", () => {
+         test("responds with a bad request if inc_votes property is missing", () => {
+            return request(app)
+               .patch("/api/comments/2")
+               .send({
+                  wrong_property: 5,
+               })
+               .expect(400)
+               .then(({ body: { msg } }) => {
+                  expect(msg).toBe("400 Bad Request");
+               });
+         });
+
+         test("responds with a bad request if inc_votes property is wrong data type", () => {
+            return request(app)
+               .patch("/api/comments/2")
+               .send({
+                  inc_votes: "wrong data type",
+               })
+               .expect(400)
+               .then(({ body: { msg } }) => {
+                  expect(msg).toBe("400 Bad Request");
+               });
+         });
+
+         test("Responds with a 400 Bad Request message when article_id parameter is invalid", () => {
+            return request(app)
+               .patch("/api/comments/invalid-parameter")
+               .send({
+                  inc_votes: 1,
+               })
+               .expect(400)
+               .then(({ body: { msg } }) => {
+                  expect(msg).toBe("400 Bad Request");
+               });
+         });
+      });
+      describe("404 Not Found", () => {
+         test("Responds with a 404 Not Found message when comment_id is not found", () => {
+            return request(app)
+               .post("/api/comments/5678")
+               .send({ inc_votes: 1 })
+               .expect(404)
+               .then(({ body: { msg } }) => {
+                  expect(msg).toBe("404 Not Found");
+               });
+         });
+      });
    });
 });
