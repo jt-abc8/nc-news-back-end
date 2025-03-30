@@ -10,7 +10,7 @@ exports.createUsersQuery = `CREATE TABLE users(
 
 exports.createArticlesQuery = `CREATE TABLE articles(
     article_id SERIAL PRIMARY KEY,
-    title VARCHAR(64) NOT NULL,
+    title VARCHAR(128) NOT NULL,
     topic VARCHAR(32) REFERENCES topics(slug) NOT NULL,
     author VARCHAR(32) REFERENCES users(username) NOT NULL,
     body TEXT NOT NULL,
