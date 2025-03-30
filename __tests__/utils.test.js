@@ -2,6 +2,7 @@ const {
    convertTimestampToDate,
    getRecordID,
    checkExists,
+   reject,
 } = require("../utils");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
@@ -76,5 +77,25 @@ describe("checkExists", () => {
             img_url: "",
          });
       });
+   });
+});
+
+describe("reject()", () => {
+   test("returns an object describing the error that has occurred", () => {
+      const err400 = reject(400).catch((rejection) => {
+         expect(rejection).toMatchObject({
+            status: 400,
+            msg: "400 Bad Request",
+         });
+      });
+
+      const err404 = reject(404).catch((rejection) => {
+         expect(rejection).toMatchObject({
+            status: 404,
+            msg: "404 Not Found",
+         });
+      });
+
+      return Promise.all([err400, err404]);
    });
 });

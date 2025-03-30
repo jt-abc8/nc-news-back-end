@@ -20,3 +20,14 @@ exports.checkExists = async (table, column, value) => {
    const { rows } = await db.query(queryStr, [value]);
    return rows[0] ?? false;
 };
+
+exports.reject = (num) => {
+   const errs = {
+      400: "400 Bad Request",
+      404: "404 Not Found"
+   }
+   return Promise.reject({
+      status: num,
+      msg: errs[num],
+   });
+}
