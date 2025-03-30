@@ -271,6 +271,136 @@ describe("/api/articles", () => {
          });
       });
    });
+   describe("POST", () => {
+      describe("201 Created", () => {
+         test("adds a new article", () => {
+            return request(app)
+               .post("/api/articles")
+               .send({
+                  author: "butter_bridge",
+                  title: "How to enjoy a damn fine cup of coffee",
+                  body: "And a slice of cherry pie",
+                  topic: "paper",
+                  article_img_url: "example.com",
+               })
+               .expect(201)
+               .then(({ body: { article } }) => {
+                  expect(article).toMatchObject({
+                     author: "butter_bridge",
+                     title: "How to enjoy a damn fine cup of coffee",
+                     body: "And a slice of cherry pie",
+                     topic: "paper",
+                     article_img_url: "example.com",
+                     article_id: 14,
+                     votes: 0,
+                     created_at: expect.any(String),
+                     comment_count: 0,
+                  });
+               });
+         });
+         test("img_url returns a default string if one is not provided", () => {
+            return request(app)
+               .post("/api/articles")
+               .send({
+                  author: "butter_bridge",
+                  title: "How to enjoy a damn fine cup of coffee",
+                  body: "And a slice of cherry pie",
+                  topic: "paper",
+                  article_img_url: "example.com",
+               })
+               .expect(201)
+               .then(({ body: { article } }) => {
+                  const {article_img_url} = article;
+                  expect(article_img_url).toEqual(expect.any(String));
+               });
+         });
+      });
+      describe("400 Bad Request", () => {
+         test("responds with a bad request when article data is incomplete", () => {
+            const noAuthor = request(app)
+               .post("/api/articles")
+               .send({
+                  title: "How to enjoy a damn fine cup of coffee",
+                  body: "And a slice of cherry pie",
+                  topic: "paper",
+                  article_img_url: "example.com",
+               })
+               .expect(400)
+               .then(({ body: { msg } }) => {
+                  expect(msg).toBe("400 Bad Request");
+               });
+            const noTitle = request(app)
+               .post("/api/articles")
+               .send({
+                  author: "butter_bridge",
+                  body: "And a slice of cherry pie",
+                  topic: "paper",
+                  article_img_url: "example.com",
+               })
+               .expect(400)
+               .then(({ body: { msg } }) => {
+                  expect(msg).toBe("400 Bad Request");
+               });
+            const noBody = request(app)
+               .post("/api/articles")
+               .send({
+                  author: "butter_bridge",
+                  title: "How to enjoy a damn fine cup of coffee",
+                  topic: "paper",
+                  article_img_url: "example.com",
+               })
+               .expect(400)
+               .then(({ body: { msg } }) => {
+                  expect(msg).toBe("400 Bad Request");
+               });
+            const noTopic = request(app)
+               .post("/api/articles")
+               .send({
+                  author: "butter_bridge",
+                  title: "How to enjoy a damn fine cup of coffee",
+                  body: "And a slice of cherry pie",
+                  article_img_url: "example.com",
+               })
+               .expect(400)
+               .then(({ body: { msg } }) => {
+                  expect(msg).toBe("400 Bad Request");
+               });
+
+            return Promise.all([noAuthor, noTitle, noBody, noTopic]);
+         });
+         test("responds with a bad request if any foreign key violations are detected", () => {
+            const authorViolation = request(app)
+               .post("/api/articles")
+               .send({
+                  author: "jt",
+                  title: "How to enjoy a damn fine cup of coffee",
+                  body: "And a slice of cherry pie",
+                  topic: "paper",
+                  article_img_url: "example.com",
+               })
+               .expect(400)
+               .then(({ body: { msg } }) => {
+                  expect(msg).toBe("400 Bad Request");
+               });
+
+            const topicViolation = request(app)
+               .post("/api/articles")
+               .send({
+                  author: "butter_bridge",
+                  title: "How to enjoy a damn fine cup of coffee",
+                  body: "And a slice of cherry pie",
+                  topic: "twin peaks",
+                  article_img_url: "example.com",
+               })
+               .expect(400)
+               .then(({ body: { msg } }) => {
+                  expect(msg).toBe("400 Bad Request");
+               });
+
+            return Promise.all([authorViolation, topicViolation]);
+         });
+      });
+   });
 });
 
 describe("/api/articles/:article_id", () => {
