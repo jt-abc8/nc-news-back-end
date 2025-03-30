@@ -28,7 +28,8 @@ exports.patchArticleVotes = (req, res, next) => {
 };
 
 exports.postArticle = (req, res, next) => {
-   insertArticle(req.body)
+   const { author, title, body, topic, article_img_url } = req.body;
+   insertArticle(author, title, body, topic, article_img_url)
       .then((article) => res.status(201).send({ article }))
       .catch((err) => next(err));
 };

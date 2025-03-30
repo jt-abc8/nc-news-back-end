@@ -1,5 +1,5 @@
 const db = require("../db/connection");
-const { checkExists } = require("../utils");
+const { checkExists, reject } = require("../utils");
 const format = require("pg-format");
 
 exports.selectArticles = async (sort_by, order, topic) => {
@@ -10,7 +10,7 @@ exports.selectArticles = async (sort_by, order, topic) => {
    const validSorts = ["title", "topic", "author", "votes", "created_at"];
    const validOrder = ["asc", "desc"];
    if (!validSorts.includes(sort_by) || !validOrder.includes(order)) {
-      return Promise.reject({ status: 400, msg: "400 Bad Request" });
+      return reject(400);
    }
 
    let queryStr = `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments)::INT AS comment_count FROM articles 
@@ -23,7 +23,7 @@ exports.selectArticles = async (sort_by, order, topic) => {
          queryStr += " WHERE articles.topic = $1";
          queryParams.push(topic);
       } else {
-         return Promise.reject({ status: 404, msg: "404 Not Found" });
+         return reject(404);
       }
    }
 
@@ -46,39 +46,32 @@ exports.selectArticleByID = (article_id) => {
          [article_id]
       )
       .then(({ rows }) => {
-         return rows.length > 0
-            ? rows[0]
-            : Promise.reject({ status: 404, msg: "404 Not Found" });
+         return rows.length > 0 ? rows[0] : reject(404);
       });
 };
 
 exports.updateArticleVotes = (article_id, inc_votes) => {
    if (!inc_votes) {
-      return Promise.reject({ status: 400, msg: "400 Bad Request" });
-   } else {
-      return checkExists("articles", "article_id", article_id).then(
-         (exists) => {
-            if (exists) {
-               return db
-                  .query(
-                     `UPDATE articles
-                        SET votes = votes + $1
-                        WHERE article_id = $2 RETURNING *`,
-                     [inc_votes, article_id]
-                  )
-                  .then(({ rows }) => rows[0]);
-            } else {
-               return Promise.reject({
-                  status: 404,
-                  msg: "404 Not Found",
-               });
-            }
-         }
-      );
+      return reject(400);
    }
+
+   return checkExists("articles", "article_id", article_id)
+      .then((exists) => {
+         if (!exists) {
+            return reject(404);
+         }
+
+         return db.query(
+            `UPDATE articles
+                  SET votes = votes + $1
+                  WHERE article_id = $2 RETURNING *`,
+            [inc_votes, article_id]
+         );
+      })
+      .then(({ rows }) => rows[0]);
 };
 
-exports.insertArticle = ({ author, title, body, topic, article_img_url }) => {
+exports.insertArticle = (author, title, body, topic, article_img_url) => {
    return db
       .query(
          `INSERT INTO articles(author, title, body, topic, article_img_url)
