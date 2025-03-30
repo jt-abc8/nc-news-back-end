@@ -5,7 +5,7 @@ exports.handleCustomErrors = (err, req, res, next) => {
 };
 
 exports.handlePsqlErrors = (err, req, res, next) => {
-   const codes = ["22P02", "23502", "23503"];
+   const codes = ["22P02", "2201W", "23502", "23503"];
    codes.includes(err.code)
       ? res.status(400).send({ msg: "400 Bad Request" })
       : next(err);

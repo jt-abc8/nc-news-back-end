@@ -2,7 +2,15 @@ const db = require("../db/connection");
 const { checkExists, reject } = require("../utils");
 const format = require("pg-format");
 
-exports.selectArticles = async (sort_by, order, topic) => {
+exports.selectArticles = async ({ sort_by, order, topic, limit, p }) => {
+   let i = 1;
+
+   if (p < 0) {
+      return reject(400);
+   }
+
+   limit ??= 10;
+   p ??= 1;
    sort_by ??= "created_at";
    const defaultDescending = ["votes", "created_at"];
    order ??= defaultDescending.includes(sort_by) ? "desc" : "asc";
@@ -19,21 +27,32 @@ exports.selectArticles = async (sort_by, order, topic) => {
    const queryParams = [];
    if (topic) {
       const exists = await checkExists("topics", "slug", topic);
-      if (exists) {
-         queryStr += " WHERE articles.topic = $1";
-         queryParams.push(topic);
-      } else {
+      if (!exists) {
          return reject(404);
       }
+      queryStr += format(` WHERE articles.topic = $%s`, i++);
+      queryParams.push(topic);
    }
-
    queryStr += format(
       ` GROUP BY articles.article_id
         ORDER BY articles.%I %s`,
       sort_by,
       order.toUpperCase()
    );
-   return db.query(queryStr, queryParams).then(({ rows }) => rows);
+   const total = await db.query(queryStr, queryParams);
+
+   const offset = (p - 1) * limit;
+
+   if (offset > 0 && offset >= total.rows.length) {
+      return reject(404);
+   }
+
+   queryParams.push(limit, offset);
+   queryStr += format(` LIMIT $%s OFFSET $%s`, i++, i++);
+
+   const page = await db.query(queryStr, queryParams);
+
+   return { articles: page.rows, total_count: total.rows.length };
 };
 
 exports.selectArticleByID = (article_id) => {
