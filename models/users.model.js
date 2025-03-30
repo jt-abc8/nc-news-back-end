@@ -1,15 +1,10 @@
 const db = require("../db/connection");
-const { checkExists } = require("../utils");
+const { checkExists, reject } = require("../utils");
 
-exports.selectUsers = ({ username }) => {
+exports.selectUsers = (username) => {
    if (username) {
       return checkExists("users", "username", username).then((user) => {
-         return user
-            ? { user }
-            : Promise.reject({
-                 status: 404,
-                 msg: "404 Not Found",
-              });
+         return user ? { user } : reject(404);
       });
    }
 
