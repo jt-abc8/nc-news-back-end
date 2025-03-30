@@ -64,7 +64,7 @@ describe("/api/articles", () => {
                .expect(200)
                .then(({ body: { articles } }) => {
                   expect(Array.isArray(articles)).toBe(true);
-                  expect(articles.length).toBe(13);
+                  expect(articles.length).toBeGreaterThan(0);
                   articles.forEach((article) => {
                      expect(article).not.toHaveProperty("body");
                      expect(article).toMatchObject({
@@ -176,7 +176,7 @@ describe("/api/articles", () => {
                });
                test("responds with only the articles on the specified topic", () => {
                   const mitch = request(app)
-                     .get(`/api/articles?topic=mitch`)
+                     .get(`/api/articles?topic=mitch&limit=20`)
                      .expect(200)
                      .then(({ body: { articles } }) => {
                         expect(articles.length).toBe(12);
@@ -198,6 +198,96 @@ describe("/api/articles", () => {
                      });
 
                   return Promise.all([mitch, cats]);
+               });
+            });
+         });
+
+         describe("pagination", () => {
+            describe("total_count", () => {
+               test("Returns a total_count property on the response object, displaying the total number of articles", () => {
+                  return request(app)
+                     .get(`/api/articles`)
+                     .expect(200)
+                     .then(({ body: { total_count } }) => {
+                        expect(total_count).toBe(13);
+                     });
+               });
+
+               test("Returns total_count when a filter is applied", () => {
+                  return request(app)
+                     .get(`/api/articles?topic=mitch`)
+                     .expect(200)
+                     .then(({ body: { total_count } }) => {
+                        expect(total_count).toBe(12);
+                     });
+               });
+            });
+
+            describe("queries", () => {
+               describe("limit", () => {
+                  test("limits the number of articles contained in the response array", () => {
+                     return request(app)
+                        .get(`/api/articles?limit=4`)
+                        .expect(200)
+                        .then(({ body: { articles } }) => {
+                           expect(articles.length).toBe(4);
+                        });
+                  });
+                  test("defaults to 10", () => {
+                     return request(app)
+                        .get(`/api/articles`)
+                        .expect(200)
+                        .then(({ body: { articles } }) => {
+                           expect(articles.length).toBe(10);
+                        });
+                  });
+               });
+
+               describe("p", () => {
+                  test("displays the articles on the specified page - calculated via the limit query", async () => {
+                     let res = await request(app).get("/api/articles?limit=13");
+                     const allArticles = res.body.articles;
+                     const {
+                        body: { articles },
+                     } = await request(app)
+                        .get(`/api/articles?limit=3&p=3`)
+                        .expect(200);
+
+                     expect(articles.length).toBe(3);
+                     expect(articles[0].article_id).toBe(
+                        allArticles[6].article_id
+                     );
+                     expect(articles[1].article_id).toBe(
+                        allArticles[7].article_id
+                     );
+                     expect(articles[2].article_id).toBe(
+                        allArticles[8].article_id
+                     );
+                  });
+
+                  test("defaults to 1", async () => {
+                     let res = await request(app).get("/api/articles?limit=13");
+                     const allArticles = res.body.articles;
+                     const {
+                        body: { articles },
+                     } = await request(app)
+                        .get(`/api/articles?limit=4`)
+                        .expect(200);
+
+                     expect(articles.length).toBe(4);
+                     expect(articles[0].article_id).toBe(
+                        allArticles[0].article_id
+                     );
+                     expect(articles[1].article_id).toBe(
+                        allArticles[1].article_id
+                     );
+                     expect(articles[2].article_id).toBe(
+                        allArticles[2].article_id
+                     );
+                     expect(articles[3].article_id).toBe(
+                        allArticles[3].article_id
+                     );
+                  });
                });
             });
          });
@@ -224,6 +314,16 @@ describe("/api/articles", () => {
                      });
                });
             });
+            describe("p", () => {
+               test("Responds with 404 Not Found when p query value is greater than total number of pages", () => {
+                  return request(app)
+                     .get("/api/articles?limit=4&p=8")
+                     .expect(404)
+                     .then(({ body: { msg } }) => {
+                        expect(msg).toBe("404 Not Found");
+                     });
+               });
+            })
          });
       });
 
@@ -268,6 +368,50 @@ describe("/api/articles", () => {
                      });
                });
             });
+            describe("limit", () => {
+               test(
+                  "Responds with 400 Bad Request when limit query is invalid",
+                  () => {
+                     const invalid = request(app)
+                        .get("/api/articles?limit=invalid")
+                        .expect(400)
+                        .then(({ body: { msg } }) => {
+                           expect(msg).toBe("400 Bad Request");
+                        });
+
+                     const negative = request(app)
+                        .get("/api/articles?limit=-10")
+                        .expect(400)
+                        .then(({ body: { msg } }) => {
+                           expect(msg).toBe("400 Bad Request");
+                        });
+
+                     return Promise.all([invalid, negative]);
+                  }
+               );
+            });
+            describe("p", () => {
+               test(
+                  "Responds with 400 Bad Request when p query is invalid",
+                  () => {
+                     const invalid = request(app)
+                        .get("/api/articles?p=invalid")
+                        .expect(400)
+                        .then(({ body: { msg } }) => {
+                           expect(msg).toBe("400 Bad Request");
+                        });
+
+                     const negative = request(app)
+                        .get("/api/articles?p=-4")
+                        .expect(400)
+                        .then(({ body: { msg } }) => {
+                           expect(msg).toBe("400 Bad Request");
+                        });
+
+                     return Promise.all([invalid, negative]);
+                  }
+               );
+            });
          });
       });
    });
@@ -310,7 +454,7 @@ describe("/api/articles", () => {
                })
                .expect(201)
                .then(({ body: { article } }) => {
-                  const {article_img_url} = article;
+                  const { article_img_url } = article;
                   expect(article_img_url).toEqual(expect.any(String));
                });
          });
