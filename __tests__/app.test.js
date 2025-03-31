@@ -323,7 +323,7 @@ describe("/api/articles", () => {
                         expect(msg).toBe("404 Not Found");
                      });
                });
-            })
+            });
          });
       });
 
@@ -369,48 +369,42 @@ describe("/api/articles", () => {
                });
             });
             describe("limit", () => {
-               test(
-                  "Responds with 400 Bad Request when limit query is invalid",
-                  () => {
-                     const invalid = request(app)
-                        .get("/api/articles?limit=invalid")
-                        .expect(400)
-                        .then(({ body: { msg } }) => {
-                           expect(msg).toBe("400 Bad Request");
-                        });
+               test("Responds with 400 Bad Request when limit query is invalid", () => {
+                  const invalid = request(app)
+                     .get("/api/articles?limit=invalid")
+                     .expect(400)
+                     .then(({ body: { msg } }) => {
+                        expect(msg).toBe("400 Bad Request");
+                     });
 
-                     const negative = request(app)
-                        .get("/api/articles?limit=-10")
-                        .expect(400)
-                        .then(({ body: { msg } }) => {
-                           expect(msg).toBe("400 Bad Request");
-                        });
+                  const negative = request(app)
+                     .get("/api/articles?limit=-10")
+                     .expect(400)
+                     .then(({ body: { msg } }) => {
+                        expect(msg).toBe("400 Bad Request");
+                     });
 
-                     return Promise.all([invalid, negative]);
-                  }
-               );
+                  return Promise.all([invalid, negative]);
+               });
             });
             describe("p", () => {
-               test(
-                  "Responds with 400 Bad Request when p query is invalid",
-                  () => {
-                     const invalid = request(app)
-                        .get("/api/articles?p=invalid")
-                        .expect(400)
-                        .then(({ body: { msg } }) => {
-                           expect(msg).toBe("400 Bad Request");
-                        });
+               test("Responds with 400 Bad Request when p query is invalid", () => {
+                  const invalid = request(app)
+                     .get("/api/articles?p=invalid")
+                     .expect(400)
+                     .then(({ body: { msg } }) => {
+                        expect(msg).toBe("400 Bad Request");
+                     });
 
-                     const negative = request(app)
-                        .get("/api/articles?p=-4")
-                        .expect(400)
-                        .then(({ body: { msg } }) => {
-                           expect(msg).toBe("400 Bad Request");
-                        });
+                  const negative = request(app)
+                     .get("/api/articles?p=-4")
+                     .expect(400)
+                     .then(({ body: { msg } }) => {
+                        expect(msg).toBe("400 Bad Request");
+                     });
 
-                     return Promise.all([invalid, negative]);
-                  }
-               );
+                  return Promise.all([invalid, negative]);
+               });
             });
          });
       });
@@ -876,71 +870,6 @@ describe("/api/comments/:comment_id", () => {
          });
       });
    });
-});
-
-describe("/api/users", () => {
-   describe("GET", () => {
-      describe("200 OK", () => {
-         test("responds with an array of objects containing the data for each user in the database", () => {
-            return request(app)
-               .get("/api/users")
-               .expect(200)
-               .then(({ body: { users } }) => {
-                  expect(Array.isArray(users)).toBe(true);
-                  expect(users.length).toBeGreaterThan(0);
-
-                  users.forEach((user) => {
-                     expect(user).toMatchObject({
-                        username: expect.any(String),
-                        name: expect.any(String),
-                        avatar_url: expect.any(String),
-                     });
-                  });
-               });
-         });
-      });
-      describe("404 Not Found", () => {
-         test("Responds with a 404 Not Found message when endpoint is not found", () => {
-            return request(app)
-               .get("/api/not-users")
-               .expect(404)
-               .then(({ body: { msg } }) => {
-                  expect(msg).toBe("404 Not Found");
-               });
-         });
-      });
-   });
-});
-
-describe("/api/users/:username", () => {
-   describe("GET", () => {
-      describe("200 OK", () => {
-         test("Responds with an object containing username, avatar_url and name properties", () => {
-            return request(app)
-               .get("/api/users/rogersop")
-               .expect(200)
-               .then(({ body: { user } }) => {
-                  expect(user).toMatchObject({
-                     username: "rogersop",
-                     name: "paul",
-                     avatar_url:
-                        "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4",
-                  });
-               });
-         });
-      });
-      describe("404 Not Found", () => {
-         test("Responds with a 404 Not Found message when endpoint is not found (username does not exist in database)", () => {
-            return request(app)
-               .get("/api/users/mr-not-a-username-362")
-               .expect(404)
-               .then(({ body: { msg } }) => {
-                  expect(msg).toBe("404 Not Found");
-               });
-         });
-      });
-   });
-
    describe("PATCH", () => {
       describe("200 OK", () => {
          test("increments the selected comment's votes property and returns the updated comment data", () => {
@@ -1016,6 +945,70 @@ describe("/api/users/:username", () => {
             return request(app)
                .post("/api/comments/5678")
                .send({ inc_votes: 1 })
+               .expect(404)
+               .then(({ body: { msg } }) => {
+                  expect(msg).toBe("404 Not Found");
+               });
+         });
+      });
+   });
+});
+
+describe("/api/users", () => {
+   describe("GET", () => {
+      describe("200 OK", () => {
+         test("responds with an array of objects containing the data for each user in the database", () => {
+            return request(app)
+               .get("/api/users")
+               .expect(200)
+               .then(({ body: { users } }) => {
+                  expect(Array.isArray(users)).toBe(true);
+                  expect(users.length).toBeGreaterThan(0);
+
+                  users.forEach((user) => {
+                     expect(user).toMatchObject({
+                        username: expect.any(String),
+                        name: expect.any(String),
+                        avatar_url: expect.any(String),
+                     });
+                  });
+               });
+         });
+      });
+      describe("404 Not Found", () => {
+         test("Responds with a 404 Not Found message when endpoint is not found", () => {
+            return request(app)
+               .get("/api/not-users")
+               .expect(404)
+               .then(({ body: { msg } }) => {
+                  expect(msg).toBe("404 Not Found");
+               });
+         });
+      });
+   });
+});
+
+describe("/api/users/:username", () => {
+   describe("GET", () => {
+      describe("200 OK", () => {
+         test("Responds with an object containing username, avatar_url and name properties", () => {
+            return request(app)
+               .get("/api/users/rogersop")
+               .expect(200)
+               .then(({ body: { user } }) => {
+                  expect(user).toMatchObject({
+                     username: "rogersop",
+                     name: "paul",
+                     avatar_url:
+                        "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4",
+                  });
+               });
+         });
+      });
+      describe("404 Not Found", () => {
+         test("Responds with a 404 Not Found message when endpoint is not found (username does not exist in database)", () => {
+            return request(app)
+               .get("/api/users/mr-not-a-username-362")
                .expect(404)
                .then(({ body: { msg } }) => {
                   expect(msg).toBe("404 Not Found");
