@@ -26,6 +26,23 @@
          ]
       }
    },
+   "POST /api/articles": {
+      "description": "creates a new article and responds with the article data",
+      "queries": [],
+      "exampleResponse": {
+         "article": {
+            "author": "butter_bridge",
+            "title": "How to enjoy a damn fine cup of coffee",
+            "body": "And a slice of cherry pie",
+            "topic": "twin peaks",
+            "article_img_url": "example.com",
+            "article_id": 14,
+            "votes": 0,
+            "created_at": 1586899140000,
+            "comment_count": 0
+         }
+      }
+   },
    "GET /api/articles/:article_id": {
       "description": "serves a specific article by its article_id",
       "queries": [],
@@ -37,6 +54,21 @@
          "created_at": "2018-05-30T15:59:13.341Z",
          "votes": 0,
          "comment_count": 6
+      }
+   },
+   "PATCH /api/articles/:article_id": {
+      "description": "updates the votes property for the article and responds with the article data",
+      "queries": [],
+      "exampleResponse": {
+         "article": {
+            "title": "Seafood substitutions are increasing",
+            "topic": "cooking",
+            "author": "weegembump",
+            "body": "Text from the article..",
+            "created_at": "2018-05-30T15:59:13.341Z",
+            "votes": 0,
+            "comment_count": 6
+         }
       }
    },
    "GET /api/articles/:article_id/comments": {
@@ -74,18 +106,16 @@
          }
       }
    },
-   "PATCH /api/articles/:article_id": {
-      "description": "updates the votes property for the article and responds with the article data",
+   "PATCH /api/comments/:comment_id": {
+      "description": "updates the votes property for the comment and responds with the comment data",
       "queries": [],
       "exampleResponse": {
-         "article": {
-            "title": "Seafood substitutions are increasing",
-            "topic": "cooking",
-            "author": "weegembump",
-            "body": "Text from the article..",
-            "created_at": "2018-05-30T15:59:13.341Z",
-            "votes": 0,
-            "comment_count": 6
+         "comment": {
+            "article_id": 1,
+            "body": "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+            "votes": 13,
+            "author": "butter_bridge",
+            "created_at": 1586899140000
          }
       }
    },
@@ -111,5 +141,15 @@
          ]
       }
    },
-   "GET /api/users/:username": {}
+   "GET /api/users/:username": {
+      "description": "serves data for a particular user by username",
+      "queries": [],
+      "exampleResponse": {
+         "user": {
+            "username": "rogersop",
+            "name": "paul",
+            "avatar_url": "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4"
+         }
+      }
+   }
 }
