@@ -120,6 +120,10 @@ describe("/api/articles", () => {
                test("sorts the response by votes, default descending", () => {
                   return sortBy("votes", "descending");
                });
+
+               test("sorts the response by comment_count, default descending", () => {
+                  return sortBy("comment_count", "descending")
+               })
             });
 
             describe("order", () => {

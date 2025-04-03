@@ -12,10 +12,18 @@ exports.selectArticles = async ({ sort_by, order, topic, limit, p }) => {
    limit ??= 10;
    p ??= 1;
    sort_by ??= "created_at";
-   const defaultDescending = ["votes", "created_at"];
+
+   const defaultDescending = ["votes", "created_at", "comment_count"];
    order ??= defaultDescending.includes(sort_by) ? "desc" : "asc";
 
-   const validSorts = ["title", "topic", "author", "votes", "created_at", "comment_count"];
+   const validSorts = [
+      "title",
+      "topic",
+      "author",
+      "votes",
+      "created_at",
+      "comment_count",
+   ];
    const validOrder = ["asc", "desc"];
    if (!validSorts.includes(sort_by) || !validOrder.includes(order)) {
       return reject(400);
@@ -33,12 +41,24 @@ exports.selectArticles = async ({ sort_by, order, topic, limit, p }) => {
       queryStr += format(` WHERE articles.topic = $%s`, i++);
       queryParams.push(topic);
    }
-   queryStr += format(
-      ` GROUP BY articles.article_id
-        ORDER BY articles.%I %s`,
-      sort_by,
-      order.toUpperCase()
-   );
+
+   if (sort_by === "comment_count") {
+      queryStr += format(
+         ` GROUP BY articles.article_id
+           ORDER BY %I %s`,
+         sort_by,
+         order.toUpperCase()
+      );
+   } else {
+      queryStr += format(
+         ` GROUP BY articles.article_id
+           ORDER BY articles.%I %s`,
+         sort_by,
+         order.toUpperCase()
+      );
+
+   }
+
    const total = await db.query(queryStr, queryParams);
 
    const offset = (p - 1) * limit;
