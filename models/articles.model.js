@@ -15,7 +15,7 @@ exports.selectArticles = async ({ sort_by, order, topic, limit, p }) => {
    const defaultDescending = ["votes", "created_at"];
    order ??= defaultDescending.includes(sort_by) ? "desc" : "asc";
 
-   const validSorts = ["title", "topic", "author", "votes", "created_at"];
+   const validSorts = ["title", "topic", "author", "votes", "created_at", "comment_count"];
    const validOrder = ["asc", "desc"];
    if (!validSorts.includes(sort_by) || !validOrder.includes(order)) {
       return reject(400);
