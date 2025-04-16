@@ -1,7 +1,7 @@
 # NC News Seeding
 
 ## Project Summary
-This project is a RESTful API for a Reddit-style application, providing access to a database of articles, comments, users and topics. The link to the hosted version can be found here: [NC News API](https://nc-news-i5we.onrender.com/api)
+This project is a RESTful API for a Reddit-style social media/blogging site. It provides access to a PostgreSQL database containing data for the site's articles, comments, users and topics. The link to the hosted version can be found here: [NC News API](https://nc-news-i5we.onrender.com/api)
 
 ## Running a local version
 To run a local version of this project, follow these steps:
