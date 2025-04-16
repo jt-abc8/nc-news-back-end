@@ -43,7 +43,7 @@ You should now be able to run a local version of this project. To run the tests 
 `npm t app`
 
 ## Minimum Versions
-The minimum versions of Node.js and PostgreSQL required to run this project are as follows:
+The minimum versions of Node.js and PostgreSQL required to run this project locally are as follows:
 - Node.js: v23.4.0
 - PostgreSQL: v16.8
 
