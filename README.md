@@ -9,7 +9,7 @@ To run a local version of this project, follow these steps:
 ### 1. Clone repository
 Run the following command in your terminal:
 
-`git clone https://github.com/jt-abc8/nc-news.git`
+`git clone https://github.com/jt-abc8/nc-news-back-end.git`
 
 ### 2. Install dependencies
 This project uses [Express](https://expressjs.com/), [node-postgres](https://node-postgres.com/), [dotenv](https://github.com/motdotla/dotenv) and [pg-format](https://github.com/datalanche/node-pg-format). 
