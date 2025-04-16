@@ -6,7 +6,7 @@ This project is a RESTful API for a Reddit-style social media/blogging site. It 
 ## Running a local version
 To run a local version of this project, follow these steps:
 
-### 1. Clone database
+### 1. Clone repository
 Run the following command in your terminal:
 
 `git clone https://github.com/jt-abc8/nc-news.git`
