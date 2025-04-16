@@ -46,3 +46,6 @@ You should now be able to run a local version of this project. To run the tests 
 The minimum versions of Node.js and PostgreSQL required to run this project are as follows:
 - Node.js: v23.4.0
 - PostgreSQL: v16.8
+
+##
+This portfolio project was created as part of a Digital Skills Bootcamp in Software Engineering provided by [Northcoders](https://northcoders.com/)
