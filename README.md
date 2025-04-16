@@ -1,4 +1,4 @@
-# NC News Seeding
+# NC News back-end
 
 ## Project Summary
 This project is a RESTful API for a Reddit-style social media/blogging site. It provides access to a PostgreSQL database containing data for the site's articles, comments, users and topics. The link to the hosted version can be found here: [NC News API](https://nc-news-i5we.onrender.com/api)
@@ -16,7 +16,7 @@ This project uses [Express](https://expressjs.com/), [node-postgres](https://nod
 
 The dev dependencies used for testing include [Jest](https://jestjs.io/), [SuperTest](https://github.com/ladjs/supertest) and [Husky](https://github.com/typicode/husky). 
 
-Navigate to the project folder in your terminal and then run `npm i` to install them all.
+Navigate to the project folder in your terminal and then run `npm install` to install them all.
 
 ### 3. Create databases
 Run the following command in your terminal: 
