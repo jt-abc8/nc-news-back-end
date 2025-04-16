@@ -1,4 +1,4 @@
-# NC News back-end
+# NC News (back-end)
 
 ## Project Summary
 This project is a RESTful API for a Reddit-style social media/blogging site. It provides access to a PostgreSQL database containing data for the site's articles, comments, users and topics. The link to the hosted version can be found here: [NC News API](https://nc-news-i5we.onrender.com/api)
